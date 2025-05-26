@@ -36,6 +36,26 @@ POST /api/auth/refresh-token
 POST /api/auth/logout
 ```
 
+### SSO Authentication
+
+```
+POST /api/sso/google
+POST /api/sso/microsoft
+```
+
+### Role Management
+
+```
+POST /api/role/init                    # Initialize user role (Anonymous)
+POST /api/role                         # Create new role (Admin only)
+DELETE /api/role/{roleName}           # Delete role (Admin only)
+POST /api/role/assign                 # Assign role to user (Admin only)
+POST /api/role/remove                 # Remove role from user (Admin only)
+GET /api/role                         # Get all roles (Admin only)
+GET /api/role/by-role/{roleName}/users # Get users in role (Admin only)
+GET /api/role/by-user/{userId}        # Get user roles (Admin only)
+```
+
 ### Tenant Management
 
 ```
@@ -48,43 +68,27 @@ GET /api/tenants/{id}
 
 ### CRM Features
 
+#### Deals (Admin, Manager, Sales)
+
 ```
-GET /api/customers
-POST /api/customers
-PUT /api/customers/{id}
-DELETE /api/customers/{id}
-GET /api/customers/{id}
-```
-
-## Database Schema
-
-### Tenant
-
-```sql
-CREATE TABLE Tenants (
-    Id INT PRIMARY KEY,
-    Name NVARCHAR(100),
-    Domain NVARCHAR(100),
-    IsActive BIT,
-    CreatedAt DATETIME,
-    UpdatedAt DATETIME
-)
+GET /api/deals                        # Get all deals
+GET /api/deals/customer/{customerId}  # Get deals by customer
+GET /api/deals/stage/{stage}         # Get deals by stage
+GET /api/deals/{id}                  # Get deal by ID
+POST /api/deals                      # Create new deal (Admin, Manager, Sales)
+PUT /api/deals/{id}                  # Update deal (Admin, Manager)
+DELETE /api/deals/{id}               # Delete deal (Admin only)
 ```
 
-### Customer
+#### Contacts (Admin, Manager, Sales)
 
-```sql
-CREATE TABLE Customers (
-    Id INT PRIMARY KEY,
-    TenantId INT,
-    Name NVARCHAR(100),
-    Email NVARCHAR(100),
-    Phone NVARCHAR(20),
-    Address NVARCHAR(200),
-    CreatedAt DATETIME,
-    UpdatedAt DATETIME,
-    FOREIGN KEY (TenantId) REFERENCES Tenants(Id)
-)
+```
+GET /api/contacts                     # Get all contacts
+GET /api/contacts/customer/{customerId} # Get contacts by customer
+GET /api/contacts/{id}               # Get contact by ID
+POST /api/contacts                   # Create new contact (Admin, Manager, Sales)
+PUT /api/contacts/{id}               # Update contact (Admin, Manager)
+DELETE /api/contacts/{id}            # Delete contact (Admin only)
 ```
 
 ## Configuration
@@ -270,3 +274,111 @@ backend/
 - Recovery procedures
 - Data restoration
 - Service continuity
+
+## Environment Configuration
+
+### Development Settings (appsettings.Development.json)
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=Your-Server;Database=WhiteLableDB;Trusted_Connection=True;TrustServerCertificate=True;",
+    "MasterConnection": "Server=Your-Server;Database=master;Trusted_Connection=True;TrustServerCertificate=True;"
+  },
+  "Jwt": {
+    "Key": "YourSecretKeyHere123!@asdf$%^&*yt4-making-it-longer-so-it-works",
+    "Issuer": "YourIssuer",
+    "Audience": "YourAudience",
+    "ExpiryInMinutes": 1000
+  },
+  "Authentication": {
+    "Google": {
+      "ClientId": "" // Configure your Google Client ID
+    },
+    "Microsoft": {
+      "Instance": "https://login.microsoftonline.com/",
+      "ClientId": "", // Configure your Microsoft Client ID
+      "TenantId": "", // Configure your Microsoft Tenant ID
+      "Scopes": {
+        "Read": ["Expense.Read", "Expense.Write"],
+        "Write": ["Expense.Write"]
+      }
+    }
+  },
+  "EmailSettings": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "SmtpUsername": "your-gmail@gmail.com",
+    "SmtpPassword": "", // Configure your SMTP password
+    "FromEmail": "your-gmail@gmail.com",
+    "FromName": "WhiteLabel"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "FrontendUrl": "http://localhost:4200",
+  "AllowedHosts": "*",
+  "AllowedOrigins": "http://localhost:4200"
+}
+```
+
+### Required Environment Variables
+
+1. Database Configuration:
+
+   - DefaultConnection: Main database connection string
+   - MasterConnection: Master database connection string
+
+2. JWT Configuration:
+
+   - Jwt:Key: Secret key for JWT token generation
+   - Jwt:Issuer: Token issuer
+   - Jwt:Audience: Token audience
+   - Jwt:ExpiryInMinutes: Token expiration time
+
+3. Authentication:
+
+   - Google:ClientId: Google OAuth client ID
+   - Microsoft:ClientId: Microsoft OAuth client ID
+   - Microsoft:TenantId: Microsoft tenant ID
+
+4. Email Configuration:
+
+   - EmailSettings:SmtpServer: SMTP server address
+   - EmailSettings:SmtpPort: SMTP port
+   - EmailSettings:SmtpUsername: SMTP username
+   - EmailSettings:SmtpPassword: SMTP password
+   - EmailSettings:FromEmail: Sender email
+   - EmailSettings:FromName: Sender name
+
+5. CORS Configuration:
+   - FrontendUrl: Frontend application URL
+   - AllowedOrigins: Allowed CORS origins
+
+### Security Considerations
+
+1. JWT Configuration:
+
+   - Use a strong, unique secret key
+   - Set appropriate token expiration time
+   - Configure proper issuer and audience
+
+2. Authentication:
+
+   - Configure OAuth providers with proper redirect URIs
+   - Set up appropriate scopes for Microsoft authentication
+   - Secure SMTP credentials
+
+3. Database:
+
+   - Use trusted connections
+   - Enable SSL/TLS for database connections
+   - Use appropriate database permissions
+
+4. CORS:
+   - Limit allowed origins to specific domains
+   - Configure appropriate CORS policies
+   - Use secure protocols (HTTPS)

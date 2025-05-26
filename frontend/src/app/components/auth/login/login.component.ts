@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
+import { environment } from '../../../../environments/environment';
 
 declare var google: any;
 declare var msal: any;
@@ -33,7 +34,7 @@ export class LoginComponent implements AfterViewInit {
     // Initialize Google Sign-In
     if (typeof google !== 'undefined') {
       google.accounts.id.initialize({
-        client_id: '334522416360-h3ipni5mvi5g9pnds92ts48j32k7stpr.apps.googleusercontent.com',
+        client_id: environment.googleClientId,
         callback: this.handleCredentialResponse.bind(this)
       });
 
@@ -53,12 +54,7 @@ export class LoginComponent implements AfterViewInit {
     // Initialize Microsoft Sign-In
     if (typeof msal !== 'undefined') {
       this.msalInstance = new msal.PublicClientApplication({
-        auth: {
-          clientId: '74c2f172-cb58-45e7-8044-172dc9bf9c68',
-          authority: 'https://login.microsoftonline.com/85707f27-830a-4b92-aa8c-3830bfb6c6f5',
-          redirectUri: 'http://localhost:4200',
-          postLogoutRedirectUri: 'http://localhost:4200'
-        },
+        auth: environment.microsoftConfig,
         cache: {
           cacheLocation: 'sessionStorage',
           storeAuthStateInCookie: false

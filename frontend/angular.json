@@ -26,7 +26,8 @@
                 "input": "public"
               },
               "src/manifest.webmanifest",
-              "src/ngsw-config.json"
+              "src/ngsw-config.json",
+              "src/assets/icons"
             ],
             "styles": [
               "src/styles.css"
